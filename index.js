@@ -28,6 +28,7 @@ async function run() {
         await client.connect();
 
         const userCollection = client.db('mediZone').collection('users');
+        const sliderCollection = client.db('mediZone').collection('slider');
 
 
 
@@ -69,6 +70,15 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc);
             res.send(result);
         })
+
+        //slider related api
+        app.get('/sliders', async(req, res) => {
+            const result = await sliderCollection.find().toArray();
+            res.send(result);
+        })
+
+
+
 
 
         // Send a ping to confirm a successful connection
