@@ -35,13 +35,38 @@ async function run() {
         //user api
         app.post('/users', async (req, res) => {
             const userData = req.body;
+            console.log(userData.email);
+            const quary = { email: userData.email }
+            const existingUser  = await userCollection.findOne(quary);
+            if(existingUser){
+                return res.status(409).send({message: 'Account already exists.'})
+            }
             const result = await userCollection.insertOne(userData);
+            res.send(result);
+        })
+        app.get('/users', async (req, res) => {
+            const result = await userCollection.find().toArray();
             res.send(result);
         })
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const quary = { email: email };
             const result = await userCollection.findOne(quary);
+            res.send(result);
+        })
+        app.patch('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const updatedData = req.body;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: {
+                    displayName: updatedData.displayName,
+                    email: email,
+                    userRole: updatedData.userRole,
+                    image: updatedData.image
+                }
+            };
+            const result = await userCollection.updateOne(filter, updateDoc);
             res.send(result);
         })
 
