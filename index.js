@@ -10,8 +10,6 @@ app.use(cors());
 app.use(express.json())
 
 
-console.log(process.env.mongoDB_USER);
-
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = `mongodb+srv://${process.env.mongoDB_USER}:${process.env.mongoDB_PASS}@cluster0.gphdl2n.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -29,12 +27,23 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
+        const userCollection = client.db('mediZone').collection('users');
 
 
 
-        
 
-
+        //user api
+        app.post('/users', async (req, res) => {
+            const userData = req.body;
+            const result = await userCollection.insertOne(userData);
+            res.send(result);
+        })
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const quary = { email: email };
+            const result = await userCollection.findOne(quary);
+            res.send(result);
+        })
 
 
         // Send a ping to confirm a successful connection
