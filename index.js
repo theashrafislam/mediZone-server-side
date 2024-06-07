@@ -29,6 +29,8 @@ async function run() {
 
         const userCollection = client.db('mediZone').collection('users');
         const sliderCollection = client.db('mediZone').collection('slider');
+        const categoryCollection = client.db('mediZone').collection('categorys');
+        const medicinesCollection = client.db('mediZone').collection('medicines');
 
 
 
@@ -77,8 +79,28 @@ async function run() {
             res.send(result);
         })
 
+        //category related api
+        app.get('/categorys', async(req, res) => {
+            const result = await categoryCollection.find().toArray();
+            res.send(result);
+        })
 
-
+        //medicines related api
+        app.get('/medicines', async(req, res) => {
+            const category = req.query.category;
+            console.log(category);
+            medicinesCollection.aggregate([
+                {
+                    $match: {category: category}
+                }
+            ]).toArray()
+            .then(result => {
+                res.send(result);
+            })
+            .catch(error => {
+                res.status(500).send("Internal Server Error");
+            });
+        })
 
 
         // Send a ping to confirm a successful connection
