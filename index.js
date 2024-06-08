@@ -32,6 +32,7 @@ async function run() {
         const categoryCollection = client.db('mediZone').collection('categorys');
         const medicinesCollection = client.db('mediZone').collection('medicines');
         const discountProductsCollection = client.db('mediZone').collection('discountProducts')
+        const cartsCollection = client.db('mediZone').collection('carts')
 
 
 
@@ -41,9 +42,9 @@ async function run() {
             const userData = req.body;
             console.log(userData.email);
             const quary = { email: userData.email }
-            const existingUser  = await userCollection.findOne(quary);
-            if(existingUser){
-                return res.status(409).send({message: 'Account already exists.'})
+            const existingUser = await userCollection.findOne(quary);
+            if (existingUser) {
+                return res.status(409).send({ message: 'Account already exists.' })
             }
             const result = await userCollection.insertOne(userData);
             res.send(result);
@@ -75,39 +76,62 @@ async function run() {
         })
 
         //slider related api
-        app.get('/sliders', async(req, res) => {
+        app.get('/sliders', async (req, res) => {
             const result = await sliderCollection.find().toArray();
             res.send(result);
         })
 
         //category related api
-        app.get('/categorys', async(req, res) => {
+        app.get('/categorys', async (req, res) => {
             const result = await categoryCollection.find().toArray();
             res.send(result);
         })
 
         //medicines related api
-        app.get('/medicines', async(req, res) => {
+        app.get('/medicines', async (req, res) => {
             const category = req.query.category;
             console.log(category);
             medicinesCollection.aggregate([
                 {
-                    $match: {category: category}
+                    $match: { category: category }
                 }
             ]).toArray()
-            .then(result => {
-                res.send(result);
-            })
-            .catch(error => {
-                res.status(500).send("Internal Server Error");
-            });
+                .then(result => {
+                    res.send(result);
+                })
+                .catch(error => {
+                    res.status(500).send("Internal Server Error");
+                });
+        })
+
+        app.get('/all-medicines', async (req, res) => {
+            const result = await medicinesCollection.find().toArray();
+            res.send(result);
         })
 
         //discountProductsAPI
-        app.get('/discountProducts', async(req, res) => {
+        app.get('/discountProducts', async (req, res) => {
             const result = await discountProductsCollection.find().toArray();
             res.send(result);
         })
+
+        // carts api make
+        app.post('/carts', async (req, res) => {
+            const data = req.body;
+            const result = await cartsCollection.insertOne(data);
+            res.send(result);
+        })
+
+        app.get('/carts', async (req, res) => {
+            const email = req.query.email;
+            const quary = { email: email };
+            const result = await cartsCollection.find(quary).toArray();
+            res.send(result);
+        })
+
+
+
+
 
 
         // Send a ping to confirm a successful connection
