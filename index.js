@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json())
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.mongoDB_USER}:${process.env.mongoDB_PASS}@cluster0.gphdl2n.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -128,6 +128,15 @@ async function run() {
             const result = await cartsCollection.find(quary).toArray();
             res.send(result);
         })
+
+        app.delete('/carts/:id', async (req, res) => {
+            const id = req.params.id;
+            const quary = { _id: new ObjectId(id) }
+            const result = await cartsCollection.deleteOne(quary);
+            res.send(result);
+        })
+
+        
 
 
 
