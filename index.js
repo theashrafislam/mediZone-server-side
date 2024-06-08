@@ -136,7 +136,12 @@ async function run() {
             res.send(result);
         })
 
-        
+        app.delete('/cart/:email', async(req, res) => {
+            const email = req.params.email;
+            const quary = {email: email}
+            const result = await cartsCollection.deleteMany(quary);
+            res.send(result);
+        })
 
 
 
