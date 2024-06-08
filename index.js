@@ -31,6 +31,7 @@ async function run() {
         const sliderCollection = client.db('mediZone').collection('slider');
         const categoryCollection = client.db('mediZone').collection('categorys');
         const medicinesCollection = client.db('mediZone').collection('medicines');
+        const discountProductsCollection = client.db('mediZone').collection('discountProducts')
 
 
 
@@ -100,6 +101,12 @@ async function run() {
             .catch(error => {
                 res.status(500).send("Internal Server Error");
             });
+        })
+
+        //discountProductsAPI
+        app.get('/discountProducts', async(req, res) => {
+            const result = await discountProductsCollection.find().toArray();
+            res.send(result);
         })
 
 
