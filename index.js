@@ -221,7 +221,7 @@ async function run() {
             const result = await paymentsCollection.find(filter).toArray();
             res.send(result);
         })
-        app.get('/payment', async(req, res) => {
+        app.get('/payment', async (req, res) => {
             const email = req.query.email;
             const filter = { sellerEmail: email };
             const result = await paymentsCollection.find(filter).toArray();
@@ -234,15 +234,20 @@ async function run() {
                 .catch(error => res.status(500).send({ error: 'Failed to fetch payment details' }));
         });
 
-        
+
         // Advertisement api make
         app.post('/advertisements', async (req, res) => {
-            const info = req.body; 
+            const info = req.body;
             const result = await advertisementCollection.insertOne(info);
             res.send(result);
         })
 
-        
+        app.get('/advertisements', async (req, res) => {
+            const sellerEmail = req.query.email;
+            const quary = { sellerEmail: sellerEmail };
+            const result = await advertisementCollection.find(quary).toArray();
+            res.send(result);
+        })
 
 
 
