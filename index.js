@@ -46,7 +46,7 @@ async function run() {
         })
 
         const verifyToken = (req, res, next) => {
-            console.log(req.headers.authorization);
+            // console.log(req.headers.authorization);
             if (!req.headers.authorization) {
                 return res.status(401).send({ message: 'unauthorized access' })
             }
@@ -63,7 +63,7 @@ async function run() {
         //user api
         app.post('/users', async (req, res) => {
             const userData = req.body;
-            console.log(userData.email);
+            // console.log(userData.email);
             const quary = { email: userData.email }
             const existingUser = await userCollection.findOne(quary);
             if (existingUser) {
@@ -113,7 +113,6 @@ async function run() {
         //medicines related api
         app.get('/medicines', async (req, res) => {
             const category = req.query.category;
-            console.log(category);
             medicinesCollection.aggregate([
                 {
                     $match: { category: category }
@@ -132,6 +131,26 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/all-medicines/:email', async (req, res) => {
+            const email = req.params.email;
+            const quary = { sellerEmail: email };
+            const result = await medicinesCollection.find(quary).toArray();
+            res.send(result);
+        })
+
+        app.post('/all-medicines', async (req, res) => {
+            const information = req.body;
+            const result = await medicinesCollection.insertOne(information);
+            res.send(result);
+        })
+
+        // app.get('/medicines-by-cart-ids', async (req, res) => {
+        //     const cartIds = req.query.cartIds.split(',').map(id => new ObjectId(id));
+        //     const quary = { _id: { $in: cartIds } };
+        //     const result = await medicinesCollection.find(quary).toArray();
+        //     res.send(result);
+        // })
+
         //discountProductsAPI
         app.get('/discountProducts', async (req, res) => {
             const result = await discountProductsCollection.find().toArray();
@@ -145,7 +164,7 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/carts', verifyToken, async (req, res) => {
+        app.get('/carts', async (req, res) => {
             const email = req.query.email;
             const quary = { email: email };
             const result = await cartsCollection.find(quary).toArray();
@@ -185,15 +204,34 @@ async function run() {
             const paymentResult = await paymentsCollection.insertOne(payment);
 
             //carefully delete each item from the cart
-            console.log(payment)
-            const query = {
-                _id: {
-                    $in: payment.cartIds.map(id => new ObjectId(id))
-                }
-            }
-            const deleteResult = await cartsCollection.deleteMany(query);
-            res.send({ paymentResult, deleteResult })
+            // console.log(payment)
+            // const query = {
+            //     _id: {
+            //         $in: payment.cartIds.map(id => new ObjectId(id))
+            //     }
+            // }
+            // const deleteResult = await cartsCollection.deleteMany(query);
+            res.send({ paymentResult })
         })
+
+        app.get('/payments', async (req, res) => {
+            const email = req.query.email;
+            const filter = { email: email };
+            const result = await paymentsCollection.find(filter).toArray();
+            res.send(result);
+        })
+        app.get('/payment', async(req, res) => {
+            const email = req.query.email;
+            const filter = { sellerEmail: email };
+            const result = await paymentsCollection.find(filter).toArray();
+            res.send(result);
+        })
+        app.get('/payments/:id', (req, res) => {
+            const paymentId = req.params.id;
+            paymentsCollection.findOne({ _id: new ObjectId(paymentId) })
+                .then(payment => res.send(payment))
+                .catch(error => res.status(500).send({ error: 'Failed to fetch payment details' }));
+        });
 
 
 
