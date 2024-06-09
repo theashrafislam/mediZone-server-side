@@ -221,6 +221,12 @@ async function run() {
             const result = await paymentsCollection.find(filter).toArray();
             res.send(result);
         })
+
+        app.get('/all-payments', async(req, res) => {
+            const result = await paymentsCollection.find().toArray();
+            res.send(result);
+        })
+
         app.get('/payment', async (req, res) => {
             const email = req.query.email;
             const filter = { sellerEmail: email };
