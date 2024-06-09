@@ -36,6 +36,7 @@ async function run() {
         const discountProductsCollection = client.db('mediZone').collection('discountProducts')
         const cartsCollection = client.db('mediZone').collection('carts')
         const paymentsCollection = client.db('mediZone').collection('payments')
+        const advertisementCollection = client.db('mediZone').collection('advertisement')
 
 
         //middleware 
@@ -233,6 +234,15 @@ async function run() {
                 .catch(error => res.status(500).send({ error: 'Failed to fetch payment details' }));
         });
 
+        
+        // Advertisement api make
+        app.post('/advertisements', async (req, res) => {
+            const info = req.body; 
+            const result = await advertisementCollection.insertOne(info);
+            res.send(result);
+        })
+
+        
 
 
 
