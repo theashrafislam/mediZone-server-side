@@ -136,7 +136,7 @@ async function run() {
             res.send(result);
         })
 
-        app.patch('categorys/:id', async (req, res) => {
+        app.patch('/categorys/:id', async (req, res) => {
             const id = req.params.id;
             const change = req.body;
             const filter = { _id: new ObjectId(id) };
@@ -144,7 +144,6 @@ async function run() {
                 $set: {
                     categoryImage: change.categoryImage,
                     categoryName: change.categoryName,
-                    numberOfCategory: change.numberOfCategory,
                 }
             };
             const result = await categoryCollection.updateOne(filter, updateDoc);
