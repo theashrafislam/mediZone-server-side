@@ -61,6 +61,34 @@ async function run() {
             })
         };
 
+        // use verify admin after verifyToken
+        const verifyAdmin = async (req, res, next) => {
+            const email = req.decoded.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            const isAdmin = user?.userRole === 'Admin';
+            if (!isAdmin) {
+                return res.status(403).send({ message: 'Forbidden access' })
+            }
+            next();
+        }
+
+
+        //admin related api
+        app.get('/users/admin/:email', verifyToken, async (req, res) => {
+            const email = req.params.email;
+            if (email !== req.decoded.email) {
+                return res.status(401).send({ message: 'unauthorized access' })
+            };
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            let admin = false;
+            if (user) {
+                admin = user?.userRole === 'Admin';
+            }
+            res.send({ admin });
+        })
+
         //user api
         app.post('/users', async (req, res) => {
             const userData = req.body;
@@ -77,7 +105,7 @@ async function run() {
             const result = await userCollection.find().toArray();
             res.send(result);
         })
-        app.patch('/users', async (req, res) => {
+        app.patch('/users', verifyToken, async (req, res) => {
             const id = req.query.id;
             const setup = req.body;
             const filter = { _id: new ObjectId(id) };
@@ -117,12 +145,12 @@ async function run() {
             res.send(result);
         })
 
-        app.post('/sliders', async (req, res) => {
+        app.post('/sliders', verifyToken, verifyAdmin, async (req, res) => {
             const data = req.body;
             const result = await sliderCollection.insertOne(data);
             res.send(result);
         })
-        app.delete('/slider/:id', async (req, res) => {
+        app.delete('/slider/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const quary = { id: id };
             const result = await sliderCollection.deleteOne(quary);
@@ -136,20 +164,20 @@ async function run() {
             res.send(result);
         })
 
-        app.post('/categorys', async (req, res) => {
+        app.post('/categorys', verifyToken, verifyAdmin, async (req, res) => {
             const category = req.body;
             const result = await categoryCollection.insertOne(category);
             res.send(result);
         })
 
-        app.delete('/categorys/:id', async (req, res) => {
+        app.delete('/categorys/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const quary = { _id: new ObjectId(id) };
             const result = await categoryCollection.deleteOne(quary);
             res.send(result);
         })
 
-        app.patch('/categorys/:id', async (req, res) => {
+        app.patch('/categorys/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const change = req.body;
             const filter = { _id: new ObjectId(id) };
@@ -184,25 +212,18 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/all-medicines/:email', async (req, res) => {
+        app.get('/all-medicines/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const quary = { sellerEmail: email };
             const result = await medicinesCollection.find(quary).toArray();
             res.send(result);
         })
 
-        app.post('/all-medicines', async (req, res) => {
+        app.post('/all-medicines', verifyToken, async (req, res) => {
             const information = req.body;
             const result = await medicinesCollection.insertOne(information);
             res.send(result);
         })
-
-        // app.get('/medicines-by-cart-ids', async (req, res) => {
-        //     const cartIds = req.query.cartIds.split(',').map(id => new ObjectId(id));
-        //     const quary = { _id: { $in: cartIds } };
-        //     const result = await medicinesCollection.find(quary).toArray();
-        //     res.send(result);
-        // })
 
         //discountProductsAPI
         app.get('/discountProducts', async (req, res) => {
@@ -217,7 +238,7 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/carts', async (req, res) => {
+        app.get('/carts', verifyToken, async (req, res) => {
             const email = req.query.email;
             const quary = { email: email };
             const result = await cartsCollection.find(quary).toArray();
@@ -255,15 +276,6 @@ async function run() {
         app.post('/payments', async (req, res) => {
             const payment = req.body;
             const paymentResult = await paymentsCollection.insertOne(payment);
-
-            //carefully delete each item from the cart
-            // console.log(payment)
-            // const query = {
-            //     _id: {
-            //         $in: payment.cartIds.map(id => new ObjectId(id))
-            //     }
-            // }
-            // const deleteResult = await cartsCollection.deleteMany(query);
             res.send({ paymentResult })
         })
 
@@ -317,7 +329,7 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/advertisements/:id', async (req, res) => {
+        app.patch('/advertisements/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const data = req.body;
             const quary = { _id: new ObjectId(id) };
