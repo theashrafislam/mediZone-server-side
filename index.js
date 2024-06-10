@@ -77,6 +77,18 @@ async function run() {
             const result = await userCollection.find().toArray();
             res.send(result);
         })
+        app.patch('/users', async (req, res) => {
+            const id = req.query.id;
+            const setup = req.body;
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    userRole: setup.userRole
+                }
+            };
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result)
+        })
         app.get('/users/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const quary = { email: email };
@@ -108,6 +120,34 @@ async function run() {
         //category related api
         app.get('/categorys', async (req, res) => {
             const result = await categoryCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.post('/categorys', async (req, res) => {
+            const category = req.body;
+            const result = await categoryCollection.insertOne(category);
+            res.send(result);
+        })
+
+        app.delete('/categorys/:id', async (req, res) => {
+            const id = req.params.id;
+            const quary = { _id: new ObjectId(id) };
+            const result = await categoryCollection.deleteOne(quary);
+            res.send(result);
+        })
+
+        app.patch('categorys/:id', async (req, res) => {
+            const id = req.params.id;
+            const change = req.body;
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    categoryImage: change.categoryImage,
+                    categoryName: change.categoryName,
+                    numberOfCategory: change.numberOfCategory,
+                }
+            };
+            const result = await categoryCollection.updateOne(filter, updateDoc);
             res.send(result);
         })
 
@@ -222,7 +262,7 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/all-payments', async(req, res) => {
+        app.get('/all-payments', async (req, res) => {
             const result = await paymentsCollection.find().toArray();
             res.send(result);
         })
