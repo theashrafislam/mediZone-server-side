@@ -117,6 +117,19 @@ async function run() {
             res.send(result);
         })
 
+        app.post('/sliders', async (req, res) => {
+            const data = req.body;
+            const result = await sliderCollection.insertOne(data);
+            res.send(result);
+        })
+        app.delete('/slider/:id', async (req, res) => {
+            const id = req.params.id;
+            const quary = { id: id };
+            const result = await sliderCollection.deleteOne(quary);
+            res.send(result);
+        })
+       
+
         //category related api
         app.get('/categorys', async (req, res) => {
             const result = await categoryCollection.find().toArray();
@@ -261,6 +274,18 @@ async function run() {
             res.send(result);
         })
 
+        app.patch('/payments/:id', async (req, res) => {
+            const id = req.params.id;
+            const quary = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    status: 'Paid'
+                }
+            };
+            const result = await paymentsCollection.updateOne(quary, updateDoc);
+            res.send(result);
+        })
+
         app.get('/all-payments', async (req, res) => {
             const result = await paymentsCollection.find().toArray();
             res.send(result);
@@ -288,9 +313,28 @@ async function run() {
         })
 
         app.get('/advertisements', async (req, res) => {
-            const sellerEmail = req.query.email;
-            const quary = { sellerEmail: sellerEmail };
-            const result = await advertisementCollection.find(quary).toArray();
+            const result = await advertisementCollection.find().toArray();
+            res.send(result)
+        })
+
+        app.patch('/advertisements/:id', async (req, res) => {
+            const id = req.params.id;
+            const data = req.body;
+            const quary = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    status: data.status
+                }
+            };
+            const result = await advertisementCollection.updateOne(quary, updateDoc);
+            res.send(result);
+        })
+
+        app.get('/advertisement', async (req, res) => {
+            const email = req.query.email;
+            console.log(email);
+            const filter = { sellerEmail: email };
+            const result = await advertisementCollection.find(filter).toArray();
             res.send(result);
         })
 
