@@ -47,7 +47,6 @@ async function run() {
         })
 
         const verifyToken = (req, res, next) => {
-            // console.log(req.headers.authorization);
             if (!req.headers.authorization) {
                 return res.status(401).send({ message: 'unauthorized access' })
             }
@@ -61,7 +60,7 @@ async function run() {
             })
         };
 
-        // use verify admin after verifyToken
+        // use verify admin after verifyTok
         const verifyAdmin = async (req, res, next) => {
             const email = req.decoded.email;
             const query = { email: email };
@@ -74,7 +73,7 @@ async function run() {
         }
 
 
-        //admin related api
+        // admin related api
         app.get('/users/admin/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             if (email !== req.decoded.email) {
@@ -92,7 +91,6 @@ async function run() {
         //user api
         app.post('/users', async (req, res) => {
             const userData = req.body;
-            // console.log(userData.email);
             const quary = { email: userData.email }
             const existingUser = await userCollection.findOne(quary);
             if (existingUser) {
@@ -145,18 +143,18 @@ async function run() {
             res.send(result);
         })
 
-        app.post('/sliders', verifyToken, verifyAdmin, async (req, res) => {
+        app.post('/sliders', verifyToken, async (req, res) => {
             const data = req.body;
             const result = await sliderCollection.insertOne(data);
             res.send(result);
         })
-        app.delete('/slider/:id', verifyToken, verifyAdmin, async (req, res) => {
+        app.delete('/slider/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const quary = { id: id };
             const result = await sliderCollection.deleteOne(quary);
             res.send(result);
         })
-       
+
 
         //category related api
         app.get('/categorys', async (req, res) => {
@@ -164,20 +162,20 @@ async function run() {
             res.send(result);
         })
 
-        app.post('/categorys', verifyToken, verifyAdmin, async (req, res) => {
+        app.post('/categorys', verifyToken, async (req, res) => {
             const category = req.body;
             const result = await categoryCollection.insertOne(category);
             res.send(result);
         })
 
-        app.delete('/categorys/:id', verifyToken, verifyAdmin, async (req, res) => {
+        app.delete('/categorys/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const quary = { _id: new ObjectId(id) };
             const result = await categoryCollection.deleteOne(quary);
             res.send(result);
         })
 
-        app.patch('/categorys/:id', verifyToken, verifyAdmin, async (req, res) => {
+        app.patch('/categorys/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const change = req.body;
             const filter = { _id: new ObjectId(id) };
@@ -260,7 +258,7 @@ async function run() {
         })
 
         // payment relate api
-        app.post("/create-payment-intent", async (req, res) => {
+        app.post("/create-payment-intent", verifyToken, async (req, res) => {
             const { price } = req.body;
             const amount = (price * 1000);
             const paymentIntent = await stripe.paymentIntents.create({
@@ -273,20 +271,20 @@ async function run() {
             })
         })
 
-        app.post('/payments', async (req, res) => {
+        app.post('/payments', verifyToken, async (req, res) => {
             const payment = req.body;
             const paymentResult = await paymentsCollection.insertOne(payment);
             res.send({ paymentResult })
         })
 
-        app.get('/payments', async (req, res) => {
+        app.get('/payments', verifyToken, async (req, res) => {
             const email = req.query.email;
             const filter = { email: email };
             const result = await paymentsCollection.find(filter).toArray();
             res.send(result);
         })
 
-        app.patch('/payments/:id', async (req, res) => {
+        app.patch('/payments/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const quary = { _id: new ObjectId(id) };
             const updateDoc = {
@@ -298,18 +296,18 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/all-payments', async (req, res) => {
+        app.get('/all-payments', verifyToken, async (req, res) => {
             const result = await paymentsCollection.find().toArray();
             res.send(result);
         })
 
-        app.get('/payment', async (req, res) => {
+        app.get('/payment', verifyToken, async (req, res) => {
             const email = req.query.email;
             const filter = { sellerEmail: email };
             const result = await paymentsCollection.find(filter).toArray();
             res.send(result);
         })
-        app.get('/payments/:id', (req, res) => {
+        app.get('/payments/:id', verifyToken, async (req, res) => {
             const paymentId = req.params.id;
             paymentsCollection.findOne({ _id: new ObjectId(paymentId) })
                 .then(payment => res.send(payment))
@@ -318,18 +316,18 @@ async function run() {
 
 
         // Advertisement api make
-        app.post('/advertisements', async (req, res) => {
+        app.post('/advertisements', verifyToken, async (req, res) => {
             const info = req.body;
             const result = await advertisementCollection.insertOne(info);
             res.send(result);
         })
 
-        app.get('/advertisements', async (req, res) => {
+        app.get('/advertisements', verifyToken, async (req, res) => {
             const result = await advertisementCollection.find().toArray();
             res.send(result)
         })
 
-        app.patch('/advertisements/:id', verifyToken, verifyAdmin, async (req, res) => {
+        app.patch('/advertisements/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const data = req.body;
             const quary = { _id: new ObjectId(id) };
@@ -342,7 +340,7 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/advertisement', async (req, res) => {
+        app.get('/advertisement', verifyToken, async (req, res) => {
             const email = req.query.email;
             console.log(email);
             const filter = { sellerEmail: email };
